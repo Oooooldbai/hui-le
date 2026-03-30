@@ -8,7 +8,7 @@
 import os
 import logging
 from PIL import Image
-from .qwen_integration import QwenVLIntegration
+from .qwen_integration import SiliconFlowVision
 from .error_analysis import ErrorAnalyzer
 from .similar_questions import SimilarQuestionGenerator
 from .feishu_storage import FeishuStorage
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class WeChatBot:
     def __init__(self):
         """初始化微信机器人"""
-        self.qwen_client = QwenVLIntegration()
+        self.qwen_client = SiliconFlowVision()
         self.error_analyzer = ErrorAnalyzer()
         self.question_generator = SimilarQuestionGenerator()
         self.feishu_storage = FeishuStorage()
