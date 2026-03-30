@@ -20,7 +20,7 @@ class QwenConfig:
 @dataclass
 class FeishuConfig:
     """飞书配置"""
-    app_token: str = ""
+    app_token: str = "ODchblduoaOfOTsOrPhcTNwmnZe"
     app_secret: str = ""
     table_id: str = ""
 
