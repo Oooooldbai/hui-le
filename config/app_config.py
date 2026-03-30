@@ -22,7 +22,7 @@ class FeishuConfig:
     """飞书配置"""
     app_token: str = "ODchblduoaOfOTsOrPhcTNwmnZe"
     app_secret: str = ""
-    table_id: str = ""
+    table_id: str = "tblJqOuFj0R7xkB0"
 
 @dataclass
 class WeChatConfig:

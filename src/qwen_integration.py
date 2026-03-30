@@ -29,7 +29,7 @@ class SiliconFlowVision:
         """
         self.api_key = api_key or os.getenv('QWEN_API_KEY')
         self.base_url = "https://api.siliconflow.cn/v1/chat/completions"
-        self.model = "Qwen/Qwen2-VL-7B-Instruct"
+        self.model = "Qwen/Qwen2-VL-72B-Instruct"
 
     def recognize_problem(self, image_path: str) -> Dict[str, Any]:
         """
