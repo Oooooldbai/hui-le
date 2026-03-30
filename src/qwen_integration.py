@@ -24,9 +24,9 @@ class QwenVLIntegration:
         Args:
             api_key: ModelScope API密钥
         """
-        self.api_key = api_key or os.getenv('MODELSCOPE_API_KEY')
-        self.base_url = "https://api.modelscope.cn/v1/chat/completions"
-        self.model = "Qwen/Qwen-VL-Max"
+        self.api_key = api_key or os.getenv('QWEN_API_KEY')
+        self.base_url = "https://api.siliconflow.cn/v1/chat/completions"
+        self.model = "Qwen/Qwen2-VL-7B-Instruct"
         
     def recognize_problem(self, image_path: str) -> Dict[str, Any]:
         """
