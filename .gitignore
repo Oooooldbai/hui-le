@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+config/local_settings.py
+logs/
+temp_images/
+*.log

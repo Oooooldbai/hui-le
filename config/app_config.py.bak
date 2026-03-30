@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+减肥搭子配置管理系统
+安全配置、模块化接口、环境分离
+"""
+
+import os
+import json
+from typing import Dict, Any
+from dataclasses import dataclass
+
+@dataclass
+class MongoDBConfig:
+    """MongoDB Atlas配置"""
+    uri: str = "mongodb+srv://username:password@cluster.mongodb.net/weight_buddy"
+    database_name: str = "weight_buddy"
+    collections: Dict[str, str] = None
+    connection_timeout: int = 5000
+    max_pool_size: int = 100
+    
+    def __post_init__(self):
+        if self.collections is None:
+            self.collections = {
+                "users": "users",
+                "conversations": "conversations",
+                "weight_records": "weight_records", 
+                "goals": "goals",
+                "memories": "memories",
+                "personalities": "personalities"
+            }
+
+@dataclass
+class ErnieConfig:
+    """文心一言API配置"""
+    api_key: str = ""
+    secret_key: str = ""
+    endpoint: str = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-3.5-8k"
+    model: str = "ernie-3.5-8k"
+    max_tokens: int = 2000
+    temperature: float = 0.8
+
+@dataclass
+class WeChatConfig:
+    """微信机器人配置"""
+    token: str = ""
+    encoding_aes_key: str = ""
+    app_id: str = ""
+    secret: str = ""
+    webhook_url: str = ""
+
+@dataclass
+class PersonalityConfig:
+    """人格配置"""
+    personalities: Dict[str, Dict] = None
+    custom_storage_path: str = "data/custom_personalities.json"
+    
+    def __post_init__(self):
+        if self.personalities is None:
+            self.personalities = {
+                "温柔鼓励型": {
+                    "prompt_template": "你叫{ai_name}，是{user_call_name}的温柔鼓励型减肥搭子，说话温暖耐心，多用表情符号💕",
+                    "speaking_style": "温暖、耐心、多用表情符号💕",
+                    "example_phrases": ["你做得真好", "慢慢来不着急", "我陪着你"]
+                },
+                "霸总督促型": {
+                    "prompt_template": "你叫{ai_name}，是{user_call_name}的霸总督促型减肥搭子，说话直接严格",
+                    "speaking_style": "直接、目标导向、严格要求",
+                    "example_phrases": ["目标明确了吗", "别让我失望", "必须完成"]
+                },
+                "毒舌激励型": {
+                    "prompt_template": "你叫{ai_name}，是{user_call_name}的毒舌激励型减肥搭子，说话扎心但有效",
+                    "speaking_style": "毒舌、激励、一针见血",
+                    "example_phrases": ["就这点毅力还想瘦", "别找借口了", "动起来！"]
+                },
+                "兄弟型": {
+                    "prompt_template": "你叫{ai_name}，是{user_call_name}的兄弟型减肥搭子，说话豪爽直接",
+                    "speaking_style": "豪爽、直接、哥们义气",
+                    "example_phrases": ["兄弟，加油！", "别怂", "干就完了"]
+                },
+                "闺蜜型": {
+                    "prompt_template": "你叫{ai_name}，是{user_call_name}的闺蜜型减肥搭子，说话贴心鼓励",
+                    "speaking_style": "贴心、鼓励、姐妹情深",
+                    "example_phrases": ["宝贝你最棒", "我们一起努力", "爱你哦💕"]
+                }
+            }
+
+@dataclass
+class MemoryConfig:
+    """记忆管理配置"""
+    short_term: Dict[str, Any] = None
+    medium_term: Dict[str, Any] = None  
+    long_term: Dict[str, Any] = None
+    
+    def __post_init__(self):
+        if self.short_term is None:
+            self.short_term = {"max_messages": 20, "expire_hours": 24}
+        if self.medium_term is None:
+            self.medium_term = {"storage_days": 90, "importance_threshold": 5}
+        if self.long_term is None:
+            self.long_term = {"storage_months": 12, "access_boost": True}
+
+@dataclass
+class TestingConfig:
+    """测试期配置"""
+    phase: str = "testing"  # testing/beta/commercial
+    all_features_unlocked: bool = True
+    commercial_hints: bool = False
+    usage_limits: Dict[str, int] = None
+    
+    def __post_init__(self):
+        if self.usage_limits is None:
+            self.usage_limits = {
+                "daily_conversations": -1,  # -1表示无限制
+                "monthly_users": -1,
+                "storage_mb": 512
+            }
+
+@dataclass
+class SystemConfig:
+    """系统运行配置"""
+    log_level: str = "INFO"
+    debug_mode: bool = False
+    backup_interval_hours: int = 24
+    health_check_interval: int = 300
+    context_monitoring: bool = True
+
+class AppConfig:
+    """应用配置管理器"""
+    
+    def __init__(self, env: str = "development"):
+        self.env = env
+        self.mongodb = MongoDBConfig()
+        self.ernie = ErnieConfig()
+        self.wechat = WeChatConfig()
+        self.personality = PersonalityConfig()
+        self.memory = MemoryConfig()
+        self.testing = TestingConfig()
+        self.system = SystemConfig()
+        
+        # 从环境变量加载敏感配置
+        self._load_from_env()
+        
+    def _load_from_env(self):
+        """从环境变量加载配置"""
+        # MongoDB配置
+        if os.getenv("MONGODB_URI"):
+            self.mongodb.uri = os.getenv("MONGODB_URI")
+        
+        # 文心一言配置  
+        if os.getenv("ERNIE_API_KEY"):
+            self.ernie.api_key = os.getenv("ERNIE_API_KEY")
+        if os.getenv("ERNIE_SECRET_KEY"):
+            self.ernie.secret_key = os.getenv("ERNIE_SECRET_KEY")
+            
+        # 微信配置
+        if os.getenv("WECHAT_TOKEN"):
+            self.wechat.token = os.getenv("WECHAT_TOKEN")
+        if os.getenv("WECHAT_APP_ID"):
+            self.wechat.app_id = os.getenv("WECHAT_APP_ID")
+            
+    def get_config_dict(self) -> Dict[str, Any]:
+        """获取完整配置字典"""
+        return {
+            "mongodb": self.mongodb.__dict__,
+            "ernie": self.ernie.__dict__,
+            "wechat": self.wechat.__dict__,
+            "personality": self.personality.__dict__,
+            "memory": self.memory.__dict__,
+            "testing": self.testing.__dict__,
+            "system": self.system.__dict__
+        }
+        
+    def validate_config(self) -> bool:
+        """配置验证"""
+        required_fields = [
+            ("mongodb.uri", self.mongodb.uri),
+            ("ernie.api_key", self.ernie.api_key),
+            ("wechat.token", self.wechat.token)
+        ]
+        
+        missing = []
+        for field_name, field_value in required_fields:
+            if not field_value:
+                missing.append(field_name)
+                
+        if missing:
+            print(f"配置缺失: {missing}")
+            return False
+            
+        return True
+
+# 全局配置实例
+config = AppConfig()
+
+if __name__ == "__main__":
+    # 测试配置加载
+    print("配置加载测试:")
+    print(f"MongoDB URI: {config.mongodb.uri}")
+    print(f"文心一言模型: {config.ernie.model}")
+    print(f"测试期全功能: {config.testing.all_features_unlocked}")
+    print(f"配置验证: {'通过' if config.validate_config() else '失败'}")

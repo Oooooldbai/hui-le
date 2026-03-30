@@ -1,0 +1,8 @@
+requests>=2.28.0
+pillow>=9.0.0
+opencv-python>=4.7.0
+torch>=2.0.0
+transformers>=4.30.0
+numpy>=1.24.0
+python-dotenv>=1.0.0
+feishu-sdk>=2.0.0
